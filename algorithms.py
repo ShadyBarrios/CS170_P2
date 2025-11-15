@@ -6,8 +6,8 @@ class Algorithms:
     def no_feat_random() -> float:
         return random.random()
 
-    # returns tuple of best features, and float of accuracy
-    def forward_selection(features: list[int]) -> tuple[tuple, float]:
+    # returns Node of the feature set with highest accuracy
+    def forward_selection(features: list[int]) -> Node:
         accuracy_not_decreasing = True
 
         current_node = Node(None, [], None)
@@ -51,6 +51,6 @@ class Algorithms:
         # current_node is the last best_child aka highest accuracy
         return current_node
 
-    # returns tuple of best features, and float of accuracy
-    def backward_elimination(features: list[int]) -> tuple[tuple, float]:
+    # returns Node of the feature set with the highest accuracy
+    def backward_elimination(features: list[int]) -> Node:
         return ((4,1,2), 0.89)
