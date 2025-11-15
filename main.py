@@ -1,5 +1,4 @@
 from algorithms import Algorithms as Algos
-from utils import *
 
 def main():
     print(f"Welcome to cjord019/sgonz26 Feature Selection Algorithm.")
@@ -30,16 +29,13 @@ def main():
     control_accuracy:float = algos[0]()
     print(f"Using no features and \"random\" evaluation, I get an accuracy of {(control_accuracy * 100):.1f}%")
 
-    features = create_feature_list(num_features)
-    choice_result:tuple[tuple, float] = algos[algo_choice](features)
-
-    best_features:tuple[int] = choice_result[0]
-    best_accuracy:float = choice_result[1]
+    choice_result:tuple[tuple, float] = algos[algo_choice](num_features)
+    choice_features:tuple[int] = choice_result[0]
+    choice_accuracy:float = choice_result[1]
     
-    best_features_str:list[str] = to_str_list(best_features)
-    best_features_output = str_list_to_str(best_features_str)
-
-    print(f"Finished search!! The best feature subset is {best_features_output}, which has an accuracy of {(best_accuracy*100):.1f}%")
+    features:list[str] = [str(feature) for feature in choice_features]
+    features_output = "{" + ",".join(features) + "}"
+    print(f"Finished search!! The best feature subset is {features_output}, which has an accuracy of {(choice_accuracy*100):.1f}%")
     
 if __name__ == "__main__":
     main()
