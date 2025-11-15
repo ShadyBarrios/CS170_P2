@@ -37,21 +37,21 @@ class Node:
         return self.features
     
     def empty_node():
-        return Node(parent=None, features=None, score=None)
+        return Node(parent=None, features=[], score=0)
     
     def set_children(self, children:list):
         self.children = children
 
     def best_child(self):
-        if self.children is None:
+        if self.children is None: # this shouldn't happen
             print("ERROR: Children have not been initialized")
-            return None
+            return self
         
-        if len(self.children) == 0:
+        if len(self.children) == 0: 
             print("ERROR: There are no children of this node")
-            return None
+            return self
 
-        child_bsf = self.children[0]
+        child_bsf:Node = self.children[0]
         for child in self.children:
             if child.get_score() > child_bsf.get_score():
                 child_bsf = child
