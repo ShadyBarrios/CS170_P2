@@ -15,9 +15,16 @@ class Node:
         return True
     
     def __str__(self) -> str:
+        output = f"Using feature(s) {self.features_str()} accuracy is {self.score_str()}"
+        return output
+    
+    def features_str(self) -> str:
         features_str_list = to_str_list(self.features)
         features_str = str_list_to_str(features_str_list)
-        output = f"Using feature(s) {features_str} accuracy is {(self.score*100):.1f}%"
+        return features_str
+    
+    def score_str(self) -> str:
+        output = f"{(self.score*100):.1f}%"
         return output
     
     def get_score(self) -> float:
@@ -25,6 +32,9 @@ class Node:
     
     def get_children(self) -> list:
         return self.children
+    
+    def get_features(self) -> list:
+        return self.features
     
     def empty_node():
         return Node(parent=None, features=None, score=None)

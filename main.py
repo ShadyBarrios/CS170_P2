@@ -1,4 +1,5 @@
 from algorithms import Algorithms as Algos
+from node import Node
 from utils import *
 
 def main():
@@ -28,18 +29,13 @@ def main():
     algos:tuple[function] = (Algos.no_feat_random, Algos.forward_selection, Algos.backward_elimination)
 
     control_accuracy:float = algos[0]()
-    print(f"Using no features and \"random\" evaluation, I get an accuracy of {(control_accuracy * 100):.1f}%")
+    print(f"\nUsing no features and \"random\" evaluation, I get an accuracy of {(control_accuracy * 100):.1f}%\n")
 
     features = create_feature_list(num_features)
-    choice_result:tuple[tuple, float] = algos[algo_choice](features)
+    print("Beginning search.\n")
+    choice_result:Node = algos[algo_choice](features)
 
-    best_features:tuple[int] = choice_result[0]
-    best_accuracy:float = choice_result[1]
-    
-    best_features_str:list[str] = to_str_list(best_features)
-    best_features_output = str_list_to_str(best_features_str)
-
-    print(f"Finished search!! The best feature subset is {best_features_output}, which has an accuracy of {(best_accuracy*100):.1f}%")
+    print(f"Finished search!! The best feature subset is {choice_result.features_str()}, which has an accuracy of {choice_result.score_str()}")
     
 if __name__ == "__main__":
     main()
