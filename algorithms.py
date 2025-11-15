@@ -1,9 +1,10 @@
 from node import Node
+from utils import *
 
 class Algorithms:
-    # returns accuracy
+    # returns random accuracy (mimicks no features and random selection)
     def no_feat_random() -> float:
-        return 0.45
+        return random.random()
 
     # returns tuple of best features, and float of accuracy
     def forward_selection(features: list[int]) -> tuple[tuple, float]:

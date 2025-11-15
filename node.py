@@ -1,4 +1,4 @@
-from utils import pseudo_evaluate
+from utils import *
 
 class Node:
     def __init__(self, parent, features:list[int], score:float):
@@ -14,6 +14,12 @@ class Node:
         
         return True
     
+    def __str__(self) -> str:
+        features_str_list = to_str_list(self.features)
+        features_str = str_list_to_str(features_str_list)
+        output = f"Using feature(s) {features_str} accuracy is {(self.score*100):.1f}%"
+        return output
+    
     def get_score(self) -> float:
         return self.score
     
@@ -23,20 +29,12 @@ class Node:
     def empty_node():
         return Node(parent=None, features=None, score=None)
     
-    def create_children(self, available_features:list[int]):
-        children = []
-        for feature in available_features:
-            features = [feature]
-            features.extend(self.features)
-            score = pseudo_evaluate(features)
-
-            child = Node(self, features, score)
-            children.append(child)
+    def set_children(self, children:list):
         self.children = children
 
     def best_child(self):
         if self.children is None:
-            print("ERROR: best child cannot be computed prior to create_children()... returning None")
+            print("ERROR: Children have not been initialized")
             return None
         
         if len(self.children) == 0:
