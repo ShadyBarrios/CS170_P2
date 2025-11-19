@@ -1,18 +1,17 @@
 from utils import *
-
+from typing import List
 class Node:
-    def __init__(self, parent, features:list[int], score:float):
+    def __init__(self, parent, features:List[int], score:float):
         self.parent:Node = parent
         self.features = features
         self.score = score
-        self.children:list[Node] = None
+        self.children:List[Node] = None
 
-    def __eq__(self, rhs:list[int]) -> bool:
-        for feature in rhs:
-            if not (feature in self.features):
-                return False
-        
-        return True
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Node):
+            return False
+        return set(self.features) == set(other.features)
+
     
     def __str__(self) -> str:
         output = f"Using feature(s) {self.features_str()} accuracy is {self.score_str()}"
@@ -30,16 +29,16 @@ class Node:
     def get_score(self) -> float:
         return self.score
     
-    def get_children(self) -> list:
+    def get_children(self) -> List:
         return self.children
     
-    def get_features(self) -> list:
+    def get_features(self) -> List:
         return self.features
     
     def empty_node():
         return Node(parent=None, features=[], score=0)
     
-    def set_children(self, children:list):
+    def set_children(self, children:List):
         self.children = children
 
     def best_child(self):
