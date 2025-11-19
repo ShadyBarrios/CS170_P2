@@ -1,5 +1,6 @@
 from node import Node
 from utils import *
+from typing import List
 
 class Algorithms:
     # returns random accuracy (mimicks no features and random selection)
@@ -7,7 +8,7 @@ class Algorithms:
         return random.random()
 
     # returns Node of the feature set with highest accuracy
-    def forward_selection(features: list[int]) -> Node:
+    def forward_selection(features: List[int]) -> Node:
         current_node = Node(None, [], None)
         features_bsf = []
         accuracy_bsf = 0
@@ -49,7 +50,7 @@ class Algorithms:
         return current_node
 
     # returns Node of the feature set with the highest accuracy
-    def backward_elimination(features: list[int]) -> Node:
+    def backward_elimination(features: List[int]) -> Node:
         current_node = Node(None, features.copy(), pseudo_evaluate(features))
         features_bsf = features.copy()
         accuracy_bsf = current_node.get_score()
