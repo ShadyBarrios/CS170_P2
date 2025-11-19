@@ -55,9 +55,6 @@ class Algorithms:
         features_bsf = features.copy()
         accuracy_bsf = current_node.get_score()
 
-        print(f"Using all features {current_node.features_str()} and random evaluation, " f"the accuracy is {current_node.score_str()}")
-        print("Beginning search")
-
         while True:
             children = []
 
@@ -91,5 +88,4 @@ class Algorithms:
             if len(features_bsf) <= 1:
                 break
 
-            print(f"Finished search!! The best feature subset is {current_node.features_str()}, " f"which has an accuracy of {current_node.score_str()}")
         return current_node

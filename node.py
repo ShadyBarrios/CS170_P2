@@ -7,12 +7,11 @@ class Node:
         self.score = score
         self.children:List[Node] = None
 
-    def __eq__(self, rhs:List[int]) -> bool:
-        for feature in rhs:
-            if not (feature in self.features):
-                return False
-        
-        return True
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Node):
+            return False
+        return set(self.features) == set(other.features)
+
     
     def __str__(self) -> str:
         output = f"Using feature(s) {self.features_str()} accuracy is {self.score_str()}"
