@@ -50,4 +50,45 @@ class Algorithms:
 
     # returns Node of the feature set with the highest accuracy
     def backward_elimination(features: list[int]) -> Node:
-        return Node.empty_node()
+        current_node = Node(None, features.copy(), pseudo_evaluate(features))
+        features_bsf = features.copy()
+        accuracy_bsf = current_node.get_score()
+
+        print(f"Using all features {current_node.features_str()} and random evaluation, " f"the accuracy is {current_node.score_str()}")
+        print("Beginning search")
+
+        while True:
+            children = []
+
+            # Get children by removing one feature from each 
+            for feature in features_bsf:
+                new_feature_set = features_bsf.copy()
+                new_feature_set.remove(feature)
+
+                score = pseudo_evaluate(new_feature_set)
+                child = Node(current_node, new_feature_set, score)
+
+                print(f"\t{child}")
+                children.append(child)
+
+            current_node.set_children(children)
+            
+            best_child = current_node.best_child()
+
+            if best_child.get_score() >= accuracy_bsf:
+                print(f"\nFeature set {best_child.features_str()} was best, " f"accuracy is {best_child.score_str()}\n")
+        
+                current_node = best_child
+                accuracy_bsf = best_child.get_score()
+                features_bsf = best_child.get_features()
+
+            else:
+                print(f"\n(Warning, Accuracy has decreased!)")
+                break
+
+            # Stop when one feature remains
+            if len(features_bsf) <= 1:
+                break
+
+            print(f"Finished search!! The best feature subset is {current_node.features_str()}, " f"which has an accuracy of {current_node.score_str()}")
+        return current_node
