@@ -1,5 +1,7 @@
 import random
+import regex
 from typing import List
+from instance import Instance
 
 # [x, y, z] -> ["x", "y", "z"]
 def to_str_list(arr: List) -> List[str]:
@@ -15,3 +17,43 @@ def str_list_to_str(arr: List[str]) -> str:
 
 def pseudo_evaluate(features: List[int]) -> float:
     return random.random()
+
+# check formatting in provided dataset using regex
+def parse_file(filename:str) -> list[Instance]:
+    line_num = 0
+    instances:list[Instance] = []
+
+    class_format = "[1-2]\.0{7}e\+0{3}"
+    feature_format = "[1-9]\.[0-9]{7}e[+-][0-9]{3}"
+
+    try:
+        with open(filename, "r") as file:
+            while True:
+                line = file.readline()
+                if line == '': # EOF
+                    break
+
+                line_num += 1
+
+                parts:list[str] = line.split()
+
+                expected_class = parts[0]
+                expected_features = " ".join(parts[1::]) # put features into one str
+
+                checked_class = regex.findall(class_format, expected_class)
+                if len(checked_class) == 0: # provided "class" does not match format
+                    print(f"ERROR: Improper class format on line {line_num}")
+                instance_class = int(float(checked_class[0])) # must convert to float first
+
+                checked_features = regex.findall(feature_format, expected_features)
+                if len(checked_features) != len(parts[1::]): # not every provided "feature" matches format
+                    print(f"ERROR: Improper feature format on line {line_num}")
+                instance_features = [float(feature) for feature in checked_features]
+
+                instance = Instance(instance_class, instance_features)
+                instances.append(instance)
+    except FileNotFoundError:
+        print(f"{filename} not found. Try again.")
+        exit()
+    
+    return instances
