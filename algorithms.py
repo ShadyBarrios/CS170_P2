@@ -1,6 +1,12 @@
 from node import Node
 from utils import *
 from typing import List
+from enum import Enum
+
+class AlgoTypes(Enum):
+    FOWARD:1
+    BACKWARD:2
+    SPECIAL:3
 
 class Algorithms:
     # returns random accuracy (mimicks no features and random selection)
