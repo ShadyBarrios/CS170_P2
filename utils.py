@@ -20,6 +20,7 @@ def pseudo_evaluate(features: List[int]) -> float:
 
 # check formatting in provided dataset using regex
 # TODO: check for .txt file
+# TODO: make sure equal number of dimensions for each instance
 def parse_file(filename:str) -> list[Instance]:
     instances:list[Instance] = []
     instance_id = 0
@@ -57,3 +58,35 @@ def parse_file(filename:str) -> list[Instance]:
         exit()
     
     return instances
+
+# use min-max normalizing
+def normalize(instances:list[Instance]) -> list[Instance]:
+    if len(instances) < 2: return instances
+    normalized_instances = []
+    dimensions = get_dimensions(instances)
+
+    for instance in instances:
+        normalized_feats = []
+        for dimension in range(instance.get_num_features()):
+            min = min(dimensions[dimension])
+            max = max(dimensions[dimension])
+            val = instance.get_feature(dimension)
+
+            normalized_feat = (val - min) / (max - min)
+            normalized_feats.append(normalized_feat)
+        normalized_instances.append(Instance(instance, normalized_feats))
+
+    return normalized_instances
+
+# get list of features based on dimensions
+def get_dimensions(instances:list[Instance]) -> list[list[float]]:
+    row_size = len(instances[0].get_features())
+    dimensions = []
+    for col in range(row_size):
+        dimension = []
+        for row in range(len(instances)):
+            dimension.append(instances[row].get_feature(col))
+        dimensions.append(dimension)
+    
+    return dimension
+            

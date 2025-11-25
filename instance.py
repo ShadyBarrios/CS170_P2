@@ -5,6 +5,15 @@ class Instance:
         self.id = id
         self.cls = cls
         self.features = features
+    
+    def __init__(self, original, normalized_features:list[float]):
+        if not isinstance(original, Instance):
+            print("ERROR: Cannot copy a non-Instance instance")
+            exit()
+        
+        self.id = original.id
+        self.cls = original.cls
+        self.features = normalized_features
 
     def get_id(self) -> int:
         return self.id
@@ -15,6 +24,16 @@ class Instance:
     def get_features(self) -> list[float]:
         return self.features
 
+    def get_feature(self, idx:int) -> float:
+        if idx >= len(self.features) or idx < 0:
+            print(f"ERROR: {idx} is not in range of this instance {self.id}")
+            exit()
+
+        return self.features[idx]
+
+    def get_num_features(self) -> int:
+        return len(self.features)
+    
     def __eq__(self, rhs) -> bool:
         if not isinstance(rhs, Instance):
             return False
