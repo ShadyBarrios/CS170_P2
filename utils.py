@@ -19,9 +19,10 @@ def pseudo_evaluate(features: List[int]) -> float:
     return random.random()
 
 # check formatting in provided dataset using regex
+# TODO: check for .txt file
 def parse_file(filename:str) -> list[Instance]:
-    line_num = 0
     instances:list[Instance] = []
+    instance_id = 0
 
     class_format = "[1-2]\.0{7}e\+0{3}"
     feature_format = "[1-9]\.[0-9]{7}e[+-][0-9]{3}"
@@ -33,8 +34,6 @@ def parse_file(filename:str) -> list[Instance]:
                 if line == '': # EOF
                     break
 
-                line_num += 1
-
                 parts:list[str] = line.split()
 
                 expected_class = parts[0]
@@ -42,16 +41,17 @@ def parse_file(filename:str) -> list[Instance]:
 
                 checked_class = regex.findall(class_format, expected_class)
                 if len(checked_class) == 0: # provided "class" does not match format
-                    print(f"ERROR: Improper class format on line {line_num}")
+                    print(f"ERROR: Improper class format on line {instance_id + 1}")
                 instance_class = int(float(checked_class[0])) # must convert to float first
 
                 checked_features = regex.findall(feature_format, expected_features)
                 if len(checked_features) != len(parts[1::]): # not every provided "feature" matches format
-                    print(f"ERROR: Improper feature format on line {line_num}")
+                    print(f"ERROR: Improper feature format on line {instance_id + 1}")
                 instance_features = [float(feature) for feature in checked_features]
 
-                instance = Instance(instance_class, instance_features)
+                instance = Instance(instance_id, instance_class, instance_features)
                 instances.append(instance)
+                instance_id += 1
     except FileNotFoundError:
         print(f"{filename} not found. Try again.")
         exit()
