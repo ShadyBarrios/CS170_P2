@@ -19,14 +19,17 @@ def pseudo_evaluate(features: List[int]) -> float:
     return random.random()
 
 # check formatting in provided dataset using regex
-# TODO: check for .txt file
-# TODO: make sure equal number of dimensions for each instance
 def parse_file(filename:str) -> list[Instance]:
     instances:list[Instance] = []
     instance_id = 0
+    size_precedence = 0
 
     class_format = "[1-2]\.0{7}e\+0{3}"
     feature_format = "[1-9]\.[0-9]{7}e[+-][0-9]{3}"
+
+    if filename[-4::] != ".txt":
+        print("ERROR: File must be .txt type")
+        exit()
 
     try:
         with open(filename, "r") as file:
@@ -43,12 +46,21 @@ def parse_file(filename:str) -> list[Instance]:
                 checked_class = regex.findall(class_format, expected_class)
                 if len(checked_class) == 0: # provided "class" does not match format
                     print(f"ERROR: Improper class format on line {instance_id + 1}")
+                    exit()
                 instance_class = int(float(checked_class[0])) # must convert to float first
 
                 checked_features = regex.findall(feature_format, expected_features)
                 if len(checked_features) != len(parts[1::]): # not every provided "feature" matches format
                     print(f"ERROR: Improper feature format on line {instance_id + 1}")
+                    exit()
                 instance_features = [float(feature) for feature in checked_features]
+
+                # want to avoid dumb branching. so did some branchless programming here
+                size_precedence = size_precedence + int(len(instance_features) * (size_precedence == 0))
+
+                if len(instance_features) != size_precedence:
+                    print("ERROR: Feature count inconsistent between instances")
+                    exit()
 
                 instance = Instance(instance_id, instance_class, instance_features)
                 instances.append(instance)
@@ -89,4 +101,3 @@ def get_dimensions(instances:list[Instance]) -> list[list[float]]:
         dimensions.append(dimension)
     
     return dimensions
-            
