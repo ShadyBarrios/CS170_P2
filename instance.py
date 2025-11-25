@@ -6,14 +6,9 @@ class Instance:
         self.cls = cls
         self.features = features
     
-    def __init__(self, original, normalized_features:list[float]):
-        if not isinstance(original, Instance):
-            print("ERROR: Cannot copy a non-Instance instance")
-            exit()
-        
-        self.id = original.id
-        self.cls = original.cls
-        self.features = normalized_features
+    # returns a copy with expected normalized features
+    def with_new_features(self, normalized_features:list[float]):
+        return Instance(self.id, self.cls, normalized_features)
 
     def get_id(self) -> int:
         return self.id

@@ -68,13 +68,13 @@ def normalize(instances:list[Instance]) -> list[Instance]:
     for instance in instances:
         normalized_feats = []
         for dimension in range(instance.get_num_features()):
-            min = min(dimensions[dimension])
-            max = max(dimensions[dimension])
+            minimum = min(dimensions[dimension])
+            maximum = max(dimensions[dimension])
             val = instance.get_feature(dimension)
 
-            normalized_feat = (val - min) / (max - min)
+            normalized_feat = (val - minimum) / (maximum - minimum)
             normalized_feats.append(normalized_feat)
-        normalized_instances.append(Instance(instance, normalized_feats))
+        normalized_instances.append(instance.with_new_features(normalized_feats))
 
     return normalized_instances
 
@@ -88,5 +88,5 @@ def get_dimensions(instances:list[Instance]) -> list[list[float]]:
             dimension.append(instances[row].get_feature(col))
         dimensions.append(dimension)
     
-    return dimension
+    return dimensions
             
