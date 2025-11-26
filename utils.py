@@ -25,8 +25,10 @@ def parse_file(filename:str) -> list[Instance]:
     instance_id = 0
     size_precedence = 0
 
-    class_format = "[1-2]\.0{7}e\+0{3}"
-    feature_format = "[1-9]\.[0-9]{7}e[+-][0-9]{3}"
+    # titanic class is either 1 or 0
+    class_format = "[0-2]\.0{7}e\+0{3}"
+    # titanic features can go from 0 to 9
+    feature_format = "[0-9]\.[0-9]{7}e[+-][0-9]{3}"
 
     if filename[-4::] != ".txt":
         print("ERROR: File must be .txt type")

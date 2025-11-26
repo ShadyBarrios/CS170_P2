@@ -95,3 +95,7 @@ class Algorithms:
                 break
 
         return current_node
+    
+    # "Original" algo will be simulated annealing (optimizing search)
+    def special_elimination(features: List[int]) -> Node:
+        pass
