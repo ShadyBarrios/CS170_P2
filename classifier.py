@@ -26,7 +26,7 @@ class Classifier:
                 print(f"ERROR: Requested instance {instance_id} is not in database")
                 exit()
             
-            print(f"Testing instance ID {instance.get_id()} with expected result {instance.get_class()}")
+            # print(f"Testing instance ID {instance.get_id()} with expected result {instance.get_class()}")
             
         if self.get_training_instances() is None or self.get_dimensions_minmax() is None:
             print(f"ERROR: Classifier has not been trained yet.")
