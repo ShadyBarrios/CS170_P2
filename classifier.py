@@ -16,7 +16,7 @@ class Classifier:
         
         normalization_results = normalize(instances)
         self.training_instances = normalization_results.get_instances()
-        self.dimensions_minmax = normalization_results.get_dimensions_minmax()
+        self.dimensions_stats = normalization_results.get_dimensions_stats()
 
     def test(self, instance:Instance|int) -> int:
         if isinstance(instance, int):
@@ -28,11 +28,11 @@ class Classifier:
             
             # print(f"Testing instance ID {instance.get_id()} with expected result {instance.get_class()}")
             
-        if self.get_training_instances() is None or self.get_dimensions_minmax() is None:
+        if self.get_training_instances() is None or self.get_dimensions_stats() is None:
             print(f"ERROR: Classifier has not been trained yet.")
             exit()
         
-        normalized_test_input = normalize_instance(instance, self.get_dimensions_minmax())
+        normalized_test_input = normalize_instance(instance, self.get_dimensions_stats())
 
         nearest_neighbor = None
         distance_bsf = float('inf')
@@ -72,5 +72,5 @@ class Classifier:
     def get_training_instances(self) -> list[Instance]:
         return self.training_instances
 
-    def get_dimensions_minmax(self) -> list[MinMax]:
-        return self.dimensions_minmax
+    def get_dimensions_stats(self) -> list[DimensionStats]:
+        return self.dimensions_stats

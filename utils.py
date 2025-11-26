@@ -1,5 +1,6 @@
 import random
 import regex
+import statistics as stats
 from typing import List
 from instance import Instance
 
@@ -77,70 +78,65 @@ def parse_file(filename:str) -> list[Instance]:
     
     return instances
 
-class MinMax:
-    def __init__(self, minimum:float, maximum:float):
-        self.minimum = minimum
-        self.maximum = maximum
+class DimensionStats:
+    def __init__(self, mean:float, std:float):
+        self.mean = mean
+        self.std = std
 
-    def get_min(self) -> float:
-        return self.minimum
+    def get_mean(self) -> float:
+        return self.mean
     
-    def get_max(self) -> float:
-        return self.maximum
+    def get_std(self) -> float:
+        return self.std
     
 class NormalizationResults:
-    def __init__(self, instances:list[Instance], dimensions_minmax:list[MinMax]):
+    def __init__(self, instances:list[Instance], dimensions_stats:list[DimensionStats]):
         self.instances = instances
-        self.dimensions_minmax = dimensions_minmax
+        self.dimensions_stats = dimensions_stats
 
     def get_instances(self) -> list[Instance]:
         return self.instances
     
-    def get_dimensions_minmax(self) -> MinMax:
-        return self.dimensions_minmax
+    def get_dimensions_stats(self) -> list[DimensionStats]:
+        return self.dimensions_stats
 
-# use min-max normalizing
+# use z-score normalizing
 def normalize(instances:list[Instance]) -> NormalizationResults:
     if len(instances) < 2: return instances
-    normalized_instances = []
+
     dimensions = get_dimensions(instances)
-    dimensions_minmax:list[MinMax] = []
-
+    dimensions_stats:list[DimensionStats] = []
     for dimension in dimensions:
-        minimum = min(dimension)
-        maximum = max(dimension)
-        dimensions_minmax.append(MinMax(minimum, maximum)) # to normalize test inputs
+        mean = stats.mean(dimension)
+        stdev = stats.stdev(dimension)
+        dimensions_stats.append(DimensionStats(mean, stdev)) # to normalize test inputs
 
+    normalized_instances = []
     for instance in instances:
-        normalized_feats = []
-        for dimension in range(len(dimensions_minmax)):
-            minimum = dimensions_minmax[dimension].get_min()
-            maximum = dimensions_minmax[dimension].get_max()
-            val = instance.get_feature(dimension)
+        normalized_instances.append(normalize_instance(instance, dimensions_stats))
 
-            normalized_feat = (val - minimum) / (maximum - minimum)
-            normalized_feats.append(normalized_feat)
-        normalized_instances.append(instance.with_new_features(normalized_feats))
-
-
-    results = NormalizationResults(normalized_instances, dimensions_minmax)
+    results = NormalizationResults(normalized_instances, dimensions_stats)
     return results
 
-def normalize_instance(instance:Instance, dimensions_minmax:list[MinMax]) -> Instance:
-    if len(instance.get_features()) != len(dimensions_minmax):
+def normalize_instance(instance:Instance, dimensions_stats:list[DimensionStats]) -> Instance:
+    if len(instance.get_features()) != len(dimensions_stats):
         print("ERROR: Cannot normalize instance with different amount of dimensions as dataset")
         exit()
     
     features = []
-    for i in range(len(dimensions_minmax)):
-        minimum = dimensions_minmax[i].get_min()
-        maximum = dimensions_minmax[i].get_max()
-        feat = instance.get_feature(i)
-        normalized_feat = (feat - minimum) / (maximum - minimum)
+    for dimension in range(len(dimensions_stats)):
+        mean = dimensions_stats[dimension].get_mean()
+        std = dimensions_stats[dimension].get_std()
+        val = instance.get_feature(dimension)
+
+        normalized_feat = z_score(val, mean, std)
         features.append(normalized_feat)
     
     normalized_instance = instance.with_new_features(features)
     return normalized_instance
+
+def z_score(value:float, mean:float, std:float):
+    return ((value - mean) / std)
 
 # get list of features based on dimensions
 def get_dimensions(instances:list[Instance]) -> list[list[float]]:
