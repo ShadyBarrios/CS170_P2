@@ -98,19 +98,24 @@ def normalize(instances:list[Instance]) -> NormalizationResults:
     if len(instances) < 2: return instances
     normalized_instances = []
     dimensions = get_dimensions(instances)
-    dimensions_minmax = []
+    dimensions_minmax:list[MinMax] = []
+
+    for dimension in dimensions:
+        minimum = min(dimension)
+        maximum = max(dimension)
+        dimensions_minmax.append(MinMax(minimum, maximum)) # to normalize test inputs
 
     for instance in instances:
         normalized_feats = []
-        for dimension in range(instance.get_num_features()):
-            minimum = min(dimensions[dimension])
-            maximum = max(dimensions[dimension])
+        for dimension in range(len(dimensions_minmax)):
+            minimum = dimensions_minmax[dimension].get_min()
+            maximum = dimensions_minmax[dimension].get_max()
             val = instance.get_feature(dimension)
 
             normalized_feat = (val - minimum) / (maximum - minimum)
             normalized_feats.append(normalized_feat)
-            dimensions_minmax.append(MinMax(minimum, maximum)) # to normalize test inputs
         normalized_instances.append(instance.with_new_features(normalized_feats))
+
 
     results = NormalizationResults(normalized_instances, dimensions_minmax)
     return results

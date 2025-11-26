@@ -3,8 +3,10 @@ from utils import *
 class Classifier:
     def __init__(self, all_instances:list[Instance]):
         self.all_instances = all_instances # not normalized
+        self.training_instances = None
+        self.dimensions_minmax = None
         
-    def Train(self, instances:list[Instance]|list[int]):
+    def train(self, instances:list[Instance]|list[int]):
         if len(instances) == 0:
             print("ERROR: Training set provided is empty")
             exit()
@@ -14,31 +16,50 @@ class Classifier:
         
         normalization_results = normalize(instances)
         self.training_instances = normalization_results.get_instances()
-        self.dimensions_minmax = normalization_results.get_dimStats()
+        self.dimensions_minmax = normalization_results.get_dimensions_minmax()
 
-    def Test(self, instance:Instance|int) -> int:
+    def test(self, instance:Instance|int) -> int:
         if isinstance(instance, int):
             instance_id = instance
-            instance = self.find_instance_with_id(instance_id)
+            instance = self.get_instance_with_id(instance_id)
             if instance is None:
                 print(f"ERROR: Requested instance {instance_id} is not in database")
                 exit()
+            
+            print(f"Testing instance ID {instance.get_id()} with expected result {instance.get_class()}")
+            
+        if self.get_training_instances() is None or self.get_dimensions_minmax() is None:
+            print(f"ERROR: Classifier has not been trained yet.")
+            exit()
         
-        normalized_instance = normalize_instance(instance, self.get_dimensions_minmax())
+        normalized_test_input = normalize_instance(instance, self.get_dimensions_minmax())
+
+        nearest_neighbor = None
+        distance_bsf = float('inf')
+        for neighbor in self.get_training_instances():
+            distance = normalized_test_input.euclid_dist_to(neighbor)
+
+            if distance < distance_bsf:
+                nearest_neighbor = neighbor
+                distance_bsf = distance
+                print(f"{nearest_neighbor.get_class()} {distance_bsf}")
         
-        pass
+        predicted_class = nearest_neighbor.get_class()
+        # print(f"Normalized input features {normalized_test_input.get_features()}")
+        # print(f"Nearest neighbor {nearest_neighbor.get_id()}, distance {distance_bsf}, features {nearest_neighbor.get_features()}")
+        return predicted_class
     
     def get_instances_from_IDs(self, IDs:list[int]) -> list[Instance]:
         instances = []
         for id in IDs:
-            instance = self.find_instance_with_id(id)
+            instance = self.get_instance_with_id(id)
             if instance is None:
                 print("ERROR: Requested ID is not in dataset")
                 exit()
             instances.append(instance)
         return instances
 
-    def find_instance_with_id(self, id:int) -> Instance|None:
+    def get_instance_with_id(self, id:int) -> Instance|None:
         for instance in self.get_all_instances():
             if instance.get_id() == id:
                 return instance
