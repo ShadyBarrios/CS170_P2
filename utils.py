@@ -1,5 +1,6 @@
 import random
 import regex
+import statistics as stats
 from typing import List
 from instance import Instance
 
@@ -20,11 +21,16 @@ def pseudo_evaluate(features: List[int]) -> float:
 
 # check formatting in provided dataset using regex
 def parse_file(filename:str) -> list[Instance]:
-    line_num = 0
     instances:list[Instance] = []
+    instance_id = 0
+    size_precedence = 0
 
     class_format = "[1-2]\.0{7}e\+0{3}"
     feature_format = "[1-9]\.[0-9]{7}e[+-][0-9]{3}"
+
+    if filename[-4::] != ".txt":
+        print("ERROR: File must be .txt type")
+        exit()
 
     try:
         with open(filename, "r") as file:
@@ -33,8 +39,6 @@ def parse_file(filename:str) -> list[Instance]:
                 if line == '': # EOF
                     break
 
-                line_num += 1
-
                 parts:list[str] = line.split()
 
                 expected_class = parts[0]
@@ -42,18 +46,106 @@ def parse_file(filename:str) -> list[Instance]:
 
                 checked_class = regex.findall(class_format, expected_class)
                 if len(checked_class) == 0: # provided "class" does not match format
-                    print(f"ERROR: Improper class format on line {line_num}")
+                    print(f"ERROR: Improper class format on line {instance_id + 1}")
+                    exit()
                 instance_class = int(float(checked_class[0])) # must convert to float first
 
                 checked_features = regex.findall(feature_format, expected_features)
                 if len(checked_features) != len(parts[1::]): # not every provided "feature" matches format
-                    print(f"ERROR: Improper feature format on line {line_num}")
+                    print(f"ERROR: Improper feature format on line {instance_id + 1}")
+                    exit()
                 instance_features = [float(feature) for feature in checked_features]
 
-                instance = Instance(instance_class, instance_features)
+                # want to avoid dumb branching. so did some branchless programming here
+                # will add 0 if size_precedence isn't 0
+                # therefore size_precedence will only be changed during the first loop iteration
+                # if size_precedence == 0:
+                #    size_precedence += len(instance_features)
+                # else:
+                #    size_precedence += 0
+                size_precedence += int(len(instance_features) * (size_precedence == 0))
+
+                if len(instance_features) != size_precedence:
+                    print("ERROR: Feature count inconsistent between instances")
+                    exit()
+
+                instance = Instance(instance_id, instance_class, instance_features)
                 instances.append(instance)
+                instance_id += 1
     except FileNotFoundError:
         print(f"{filename} not found. Try again.")
         exit()
     
     return instances
+
+class DimensionStats:
+    def __init__(self, mean:float, std:float):
+        self.mean = mean
+        self.std = std
+
+    def get_mean(self) -> float:
+        return self.mean
+    
+    def get_std(self) -> float:
+        return self.std
+    
+class NormalizationResults:
+    def __init__(self, instances:list[Instance], dimensions_stats:list[DimensionStats]):
+        self.instances = instances
+        self.dimensions_stats = dimensions_stats
+
+    def get_instances(self) -> list[Instance]:
+        return self.instances
+    
+    def get_dimensions_stats(self) -> list[DimensionStats]:
+        return self.dimensions_stats
+
+# use z-score normalizing
+def normalize(instances:list[Instance]) -> NormalizationResults:
+    if len(instances) < 2: return instances
+
+    dimensions = get_dimensions(instances)
+    dimensions_stats:list[DimensionStats] = []
+    for dimension in dimensions:
+        mean = stats.mean(dimension)
+        stdev = stats.stdev(dimension)
+        dimensions_stats.append(DimensionStats(mean, stdev)) # to normalize test inputs
+
+    normalized_instances = []
+    for instance in instances:
+        normalized_instances.append(normalize_instance(instance, dimensions_stats))
+
+    results = NormalizationResults(normalized_instances, dimensions_stats)
+    return results
+
+def normalize_instance(instance:Instance, dimensions_stats:list[DimensionStats]) -> Instance:
+    if len(instance.get_features()) != len(dimensions_stats):
+        print("ERROR: Cannot normalize instance with different amount of dimensions as dataset")
+        exit()
+    
+    features = []
+    for dimension in range(len(dimensions_stats)):
+        mean = dimensions_stats[dimension].get_mean()
+        std = dimensions_stats[dimension].get_std()
+        val = instance.get_feature(dimension)
+
+        normalized_feat = z_score(val, mean, std)
+        features.append(normalized_feat)
+    
+    normalized_instance = instance.with_new_features(features)
+    return normalized_instance
+
+def z_score(value:float, mean:float, std:float):
+    return ((value - mean) / std)
+
+# get list of features based on dimensions
+def get_dimensions(instances:list[Instance]) -> list[list[float]]:
+    row_size = len(instances[0].get_features())
+    dimensions = []
+    for col in range(row_size):
+        dimension = []
+        for row in range(len(instances)):
+            dimension.append(instances[row].get_feature(col))
+        dimensions.append(dimension)
+    
+    return dimensions

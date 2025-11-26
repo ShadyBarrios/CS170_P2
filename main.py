@@ -2,6 +2,7 @@ from algorithms import Algorithms as Algos
 from node import Node
 from utils import *
 
+#TODO: remake this to test validator class
 def main():
     print(f"Welcome to cjord019/sgonz26 Feature Selection Algorithm.")
     try:
