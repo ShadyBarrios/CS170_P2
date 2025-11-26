@@ -56,7 +56,13 @@ def parse_file(filename:str) -> list[Instance]:
                 instance_features = [float(feature) for feature in checked_features]
 
                 # want to avoid dumb branching. so did some branchless programming here
-                size_precedence = size_precedence + int(len(instance_features) * (size_precedence == 0))
+                # will add 0 if size_precedence isn't 0
+                # therefore size_precedence will only be changed during the first loop iteration
+                # if size_precedence == 0:
+                #    size_precedence += len(instance_features)
+                # else:
+                #    size_precedence += 0
+                size_precedence += int(len(instance_features) * (size_precedence == 0))
 
                 if len(instance_features) != size_precedence:
                     print("ERROR: Feature count inconsistent between instances")
