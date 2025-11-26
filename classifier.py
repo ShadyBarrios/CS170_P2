@@ -4,7 +4,7 @@ class Classifier:
     def __init__(self, all_instances:list[Instance]):
         self.all_instances = all_instances # not normalized
         self.training_instances = None
-        self.dimensions_minmax = None
+        self.dimensions_stats = None
         
     def train(self, instances:list[Instance]|list[int]):
         if len(instances) == 0:
