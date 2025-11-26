@@ -71,11 +71,34 @@ def parse_file(filename:str) -> list[Instance]:
     
     return instances
 
+class MinMax:
+    def __init__(self, minimum:float, maximum:float):
+        self.minimum = minimum
+        self.maximum = maximum
+
+    def get_min(self) -> float:
+        return self.minimum
+    
+    def get_max(self) -> float:
+        return self.maximum
+    
+class NormalizationResults:
+    def __init__(self, instances:list[Instance], dimensions_minmax:list[MinMax]):
+        self.instances = instances
+        self.dimensions_minmax = dimensions_minmax
+
+    def get_instances(self) -> list[Instance]:
+        return self.instances
+    
+    def get_dimensions_minmax(self) -> MinMax:
+        return self.dimensions_minmax
+
 # use min-max normalizing
-def normalize(instances:list[Instance]) -> list[Instance]:
+def normalize(instances:list[Instance]) -> NormalizationResults:
     if len(instances) < 2: return instances
     normalized_instances = []
     dimensions = get_dimensions(instances)
+    dimensions_minmax = []
 
     for instance in instances:
         normalized_feats = []
@@ -86,9 +109,27 @@ def normalize(instances:list[Instance]) -> list[Instance]:
 
             normalized_feat = (val - minimum) / (maximum - minimum)
             normalized_feats.append(normalized_feat)
+            dimensions_minmax.append(MinMax(minimum, maximum)) # to normalize test inputs
         normalized_instances.append(instance.with_new_features(normalized_feats))
 
-    return normalized_instances
+    results = NormalizationResults(normalized_instances, dimensions_minmax)
+    return results
+
+def normalize_instance(instance:Instance, dimensions_minmax:list[MinMax]) -> Instance:
+    if len(instance.get_features()) != len(dimensions_minmax):
+        print("ERROR: Cannot normalize instance with different amount of dimensions as dataset")
+        exit()
+    
+    features = []
+    for i in range(len(dimensions_minmax)):
+        minimum = dimensions_minmax[i].get_min()
+        maximum = dimensions_minmax[i].get_max()
+        feat = instance.get_feature(i)
+        normalized_feat = (feat - minimum) / (maximum - minimum)
+        features.append(normalized_feat)
+    
+    normalized_instance = instance.with_new_features(features)
+    return normalized_instance
 
 # get list of features based on dimensions
 def get_dimensions(instances:list[Instance]) -> list[list[float]]:
