@@ -96,8 +96,8 @@ class Algorithms:
 
         return current_node
     
-    # EC: "Original" algo will be bidirectional search
-    def bidirectional_search(features: List[int]) -> Node:
+    # EC: "Original" algo will be a mix of forward selection and backward elimination search
+    def hybrid_search(features: List[int]) -> Node:
         empty_node = Node(None, [], float('-inf'))
         full_node = Node(None, features.copy(), pseudo_evaluate(features.copy()))
 
