@@ -80,7 +80,7 @@ class Algorithms:
             best_child = current_node.best_child()
 
             if best_child.get_score() >= accuracy_bsf:
-                print(f"\nFeature set {best_child.features_str()} was best, " f"accuracy is {best_child.score_str()}\n")
+                print(f"\nFeature set {best_child.features_str()} was best, accuracy is {best_child.score_str()}\n")
         
                 current_node = best_child
                 accuracy_bsf = best_child.get_score()
@@ -96,6 +96,96 @@ class Algorithms:
 
         return current_node
     
-    # "Original" algo will be simulated annealing (optimizing search)
+    # EC: "Original" algo will be bidirectional search
     def special_elimination(features: List[int]) -> Node:
-        pass
+        empty_node = Node(None, [], None)
+        full_node = Node(None, features.copy(), None)
+
+        continue_forward = True
+        continue_backward = True
+
+        current_node_forward = empty_node
+        current_node_backward = full_node
+
+        features_bsf_forward = []
+        features_bsf_backward = []
+
+        accuracy_bsf_forward = float('-inf')
+        accuracy_bsf_backward = float('-inf')
+
+        while True:
+            # Forward part
+            if continue_forward:
+                children_forward = []
+
+                for feature in features:
+                    if feature in features_bsf_forward:
+                        continue
+
+                    new_feature_set = [feature]
+                    new_feature_set.extend(features_bsf_forward)
+
+                    score = pseudo_evaluate(new_feature_set)
+
+                    child = Node(current_node_forward, new_feature_set, score)
+                    print(f"\t{child}")
+
+                    children_forward.append(child)
+
+                current_node_forward.set_children(children_forward)
+                best_child_forward = current_node_forward.best_child()
+
+                if current_node_forward == best_child_forward:
+                    continue_forward = False
+                elif best_child_forward.get_score() >= accuracy_bsf_forward:
+                    print(f"\nFeature set {best_child_forward.features_str()} was best, accuracy is {best_child_forward.score_str()}\n")
+
+                    current_node_forward = best_child_forward
+                    accuracy_bsf_forward = best_child_forward.get_score()
+                    features_bsf_forward = best_child_forward.get_features()
+                else:
+                    print(f"\n(Warning, accuracy has decreased in forward selection search!)")
+                    continue_forward = False
+            #################################
+            # Backwards part
+            if continue_backward:
+                children_backward = []
+
+                for feature in features_bsf_backward:
+                    new_feature_set = features_bsf_backward.copy()
+                    new_feature_set.remove(feature)
+
+                    score = pseudo_evaluate(new_feature_set)
+                    child = Node(current_node_backward, new_feature_set, score)
+
+                    print(f"\t{child}")
+                    children_backward.append(child)
+                
+                current_node_backward.set_children(children_backward)
+                best_child_backward = current_node_backward.best_child()
+
+                if current_node_backward == best_child_backward:
+                    continue_backward = False
+                elif best_child_backward.get_score() >= accuracy_bsf_backward:
+                    print(f"\nFeature set {best_child_backward.features_str()} was best, accuracy is {best_child_backward.score_str()}\n")
+
+                    current_node_backward = best_child_backward
+                    accuracy_bsf_backward = best_child_backward.get_score()
+                    features_bsf_backward = best_child_backward.get_features()
+                else:
+                    print(f"\n(Warning, accuracy has decreased in backward elimination search!)")
+                    continue_backward = False
+
+            # if both directions have found their best
+            if not (continue_forward or continue_backward):
+                break
+        
+        best_node = None
+        if current_node_forward == current_node_backward:
+            best_node = current_node_forward
+        elif current_node_forward.get_score() >= current_node_backward.get_score():
+            best_node = current_node_forward
+        else:
+            best_node = current_node_backward
+        
+        return best_node
