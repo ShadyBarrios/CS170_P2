@@ -1,7 +1,6 @@
 from node import Node
 from utils import *
 from typing import List
-from algotypes import AlgoTypes
 from instance import Instance
 from validator import Validator
 
@@ -11,7 +10,7 @@ class Algorithms:
         return random.random()
 
     # returns Node of the feature set with highest accuracy
-    def forward_selection(dataset: List[Instance]) -> Node:
+    def forward_selection(dataset: List[Instance], output=None) -> Node:
         if len(dataset) == 0:
             print("ERROR: Provided empty dataset.")
             exit()
@@ -32,7 +31,7 @@ class Algorithms:
                 new_feature_set = [feature]
                 new_feature_set.extend(features_bsf)
 
-                score = Validator.validate()
+                score = Validator.validate(new_feature_set.copy(), dataset.copy(), output)
                 
                 child = Node(current_node, new_feature_set, score)
                 print(f"\t{child}")
@@ -59,16 +58,16 @@ class Algorithms:
         return current_node
 
     # returns Node of the feature set with the highest accuracy
-    def backward_elimination(dataset: List[Instance]) -> Node:
+    def backward_elimination(dataset: List[Instance], output=None) -> Node:
         if len(dataset) == 0:
             print("ERROR: Provided empty dataset.")
             exit()
         
         num_features = len(dataset[0].get_features())
         features = create_feature_list(num_features)
+        current_node = Node(None, features.copy(), Validator.validate(features.copy(), dataset, output))
         features_bsf = features.copy()
         accuracy_bsf = current_node.get_score()
-        current_node = Node(None, features.copy(), (features))
 
         while True:
             children = []
@@ -78,7 +77,7 @@ class Algorithms:
                 new_feature_set = features_bsf.copy()
                 new_feature_set.remove(feature)
 
-                score = pseudo_evaluate(new_feature_set)
+                score = Validator.validate(new_feature_set.copy(), dataset.copy(), output)
                 child = Node(current_node, new_feature_set, score)
 
                 print(f"\t{child}")
@@ -106,9 +105,16 @@ class Algorithms:
         return current_node
     
     # EC: "Original" algo will be a mix of forward selection and backward elimination search
-    def hybrid_search(features: List[int]) -> Node:
+    def hybrid_search(dataset: List[Instance], output=None) -> Node:
+        if len(dataset) == 0:
+            print("ERROR: Provided empty dataset.")
+            exit()
+        
+        num_features = len(dataset[0].get_features())
+        features = create_feature_list(num_features)
+
         empty_node = Node(None, [], float('-inf'))
-        full_node = Node(None, features.copy(), pseudo_evaluate(features.copy()))
+        full_node = Node(None, features.copy(), Validator.validate(features.copy(), dataset.copy(), output))
 
         continue_forward = True
         continue_backward = True
@@ -136,7 +142,7 @@ class Algorithms:
                     new_feature_set = [feature]
                     new_feature_set.extend(features_bsf_forward)
 
-                    score = pseudo_evaluate(new_feature_set)
+                    score = Validator.validate(new_feature_set.copy(), dataset.copy(), output)
 
                     child = Node(current_node_forward, new_feature_set, score)
                     output_forward += f"\t{child}\n"
@@ -168,7 +174,7 @@ class Algorithms:
                     new_feature_set = features_bsf_backward.copy()
                     new_feature_set.remove(feature)
 
-                    score = pseudo_evaluate(new_feature_set)
+                    score = Validator.validate(new_feature_set.copy(), dataset.copy(), output)
                     child = Node(current_node_backward, new_feature_set, score)
 
                     output_backward += f"\t{child}\n"
@@ -189,8 +195,8 @@ class Algorithms:
                     output_backward += f"\n(Warning, accuracy has decreased in backward elimination search!)\n"
                     continue_backward = False
 
-            print(output_forward)
-            print(output_backward)
+            # print(output_forward)
+            # print(output_backward)
 
             # if both directions have found their best
             if not (continue_forward or continue_backward):
