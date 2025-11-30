@@ -1,8 +1,12 @@
 from algorithms import Algorithms as Algos
 from node import Node
 from utils import *
+from validator import Validator
 
 def main():
+    part_two()
+
+def part_one():
     print(f"Welcome to cjord019/sgonz26 Feature Selection Algorithm.")
     try:
         num_features = int(input("Please enter total number of features: "))
@@ -36,6 +40,22 @@ def main():
     choice_result:Node = algos[algo_choice](features)
 
     print(f"Finished search!! The best feature subset is {choice_result.features_str()}, which has an accuracy of {choice_result.score_str()}")
+
+def part_two():
+    with open("part_two_trace.txt", "w") as output:
+        output.write(f"Welcome to cjord019/sgonz26 Actual Evaluation and NN-Classifier.\n")
+
+        small = parse_file("small-test-dataset-2-2.txt")
+        small_subset = [3, 5, 7]
+        output.write("\nTesting small dataset with features {3,5,7}\n")
+        small_acc = Validator.validate(small_subset, None, small, output = output.write)
+        output.write(f"Small dataset accuracy: {small_acc:.4f} (expected: 0.89)\n")
+
+        large = parse_file("large-test-dataset-2.txt")
+        large_subset = [1, 15, 27]
+        output.write("\nTesting large dataset with features {1,15,27}\n")
+        large_acc = Validator.validate(large_subset, None, large, output = output.write)
+        output.write(f"Large dataset accuracy: {large_acc:.4f} (expected: 0.949)\n")
     
 if __name__ == "__main__":
     main()
