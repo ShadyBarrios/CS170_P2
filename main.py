@@ -48,13 +48,13 @@ def part_two():
         small = parse_file("small-test-dataset-2-2.txt")
         small_subset = [3, 5, 7]
         output.write("\nTesting small dataset with features {3,5,7}\n")
-        small_acc = Validator.validate(small_subset, None, small, output = output)
+        small_acc = Validator.validate(small_subset, None, small, output = output.write)
         output.write(f"Small dataset accuracy: {small_acc:.4f} (expected: 0.89)\n")
 
         large = parse_file("large-test-dataset-2.txt")
         large_subset = [1, 15, 27]
         output.write("\nTesting large dataset with features {1,15,27}\n")
-        large_acc = Validator.validate(large_subset, None, large, output = output)
+        large_acc = Validator.validate(large_subset, None, large, output = output.write)
         output.write(f"Large dataset accuracy: {large_acc:.4f} (expected: 0.949)\n")
     
 if __name__ == "__main__":
