@@ -42,7 +42,7 @@ class Classifier:
             if distance < distance_bsf:
                 nearest_neighbor = neighbor
                 distance_bsf = distance
-                print(f"{nearest_neighbor.get_class()} {distance_bsf}")
+                # print(f"{nearest_neighbor.get_class()} {distance_bsf}")
         
         predicted_class = nearest_neighbor.get_class()
         # print(f"Normalized input features {normalized_test_input.get_features()}")

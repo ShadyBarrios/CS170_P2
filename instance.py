@@ -46,6 +46,6 @@ class Instance:
 
         running_sum = 0
         for i in range(num_features):
-            running_sum = (self.features[i] - rhs.features[i])**2
+            running_sum += (self.features[i] - rhs.features[i])**2
         
         return math.sqrt(running_sum)
