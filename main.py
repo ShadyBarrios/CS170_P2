@@ -8,6 +8,10 @@ def main():
 
 def part_one():
     print(f"Welcome to cjord019/sgonz26 Feature Selection Algorithm.")
+
+    dataset_file = input("Enter the dataset file (.txt): ")
+    dataset = parse_file(dataset_file)
+    
     try:
         num_features = int(input("Please enter total number of features: "))
         if num_features < 1:

@@ -1,7 +1,7 @@
 import time
-from algorithms import Algorithms, AlgoTypes
 from instance import Instance
 from classifier import Classifier
+from algotypes import AlgoTypes
 
 class Validator:
     def validate(feature_subset:list[float], nn_type:AlgoTypes, training_data:list[Instance], output=None) -> float:

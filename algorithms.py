@@ -1,12 +1,9 @@
 from node import Node
 from utils import *
 from typing import List
-from enum import Enum
-
-class AlgoTypes(Enum):
-    FOWARD:1
-    BACKWARD:2
-    BIDIRECTIONAL:3
+from algotypes import AlgoTypes
+from instance import Instance
+from validator import Validator
 
 class Algorithms:
     # returns random accuracy (mimicks no features and random selection)
@@ -14,10 +11,16 @@ class Algorithms:
         return random.random()
 
     # returns Node of the feature set with highest accuracy
-    def forward_selection(features: List[int]) -> Node:
-        current_node = Node(None, [], None)
+    def forward_selection(dataset: List[Instance]) -> Node:
+        if len(dataset) == 0:
+            print("ERROR: Provided empty dataset.")
+            exit()
+
+        current_node = Node(None, [], None)        
         features_bsf = []
         accuracy_bsf = 0
+        num_features = len(dataset[0].get_features())
+        features = create_feature_list(num_features)
 
         while True:
             children = []
@@ -29,7 +32,7 @@ class Algorithms:
                 new_feature_set = [feature]
                 new_feature_set.extend(features_bsf)
 
-                score = pseudo_evaluate(new_feature_set)
+                score = Validator.validate()
                 
                 child = Node(current_node, new_feature_set, score)
                 print(f"\t{child}")
@@ -56,10 +59,16 @@ class Algorithms:
         return current_node
 
     # returns Node of the feature set with the highest accuracy
-    def backward_elimination(features: List[int]) -> Node:
-        current_node = Node(None, features.copy(), pseudo_evaluate(features))
+    def backward_elimination(dataset: List[Instance]) -> Node:
+        if len(dataset) == 0:
+            print("ERROR: Provided empty dataset.")
+            exit()
+        
+        num_features = len(dataset[0].get_features())
+        features = create_feature_list(num_features)
         features_bsf = features.copy()
         accuracy_bsf = current_node.get_score()
+        current_node = Node(None, features.copy(), (features))
 
         while True:
             children = []
