@@ -19,20 +19,20 @@ class Validator:
         train_time = 0
         test_time = 0
 
-        output.write(f"Validating dataset with {total} instances\n\n")
+        output(f"Validating dataset with {total} instances\n\n")
 
         reduced = []
 
         reduce_start = time.perf_counter()
         # Select features
         for feature in training_data:
-            reduced.append(Validator.select_featuers(feature, feature_indices))
+            reduced.append(Validator.select_features(feature, feature_indices))
 
         reduce_end = time.perf_counter()
-        output.write(f"Selecting features took {(reduce_end - reduce_start) * 1000:.3f} ms\n \n")
+        output(f"Selecting features took {(reduce_end - reduce_start) * 1000:.3f} ms\n \n")
 
         for i in range(total):
-            output.write(f"Excluding instance {training_data[i].get_id()}\n")
+            output(f"Excluding instance {training_data[i].get_id()}\n")
 
             training = []
             for j in range(total):
@@ -48,7 +48,7 @@ class Validator:
             clf.train(training)
             training_end = time.perf_counter()
             train_time += training_end - training_start
-            output.write(f"Classifier training took {(training_end - training_start) * 1000:.3f} ms\n")
+            output(f"Classifier training took {(training_end - training_start) * 1000:.3f} ms\n")
 
             # Test on remaining 
             test_start = time.perf_counter()
@@ -56,19 +56,19 @@ class Validator:
             test_end = time.perf_counter()
             actual = training_data[i].get_class()
             test_time += test_end - test_start
-            output.write(f"Comparing predicted ({predicted}) and actual ({actual}) took {(test_end - test_start) * 1000:.3f} ms\n")
+            output(f"Comparing predicted ({predicted}) and actual ({actual}) took {(test_end - test_start) * 1000:.3f} ms\n")
 
             if predicted == actual:
                 correct += 1
 
-            output.write(f"Correct so far: {correct} / {i+1}\n \n")
+            output(f"Correct so far: {correct} / {i+1}\n \n")
 
-        output.write(f"Validation complete! Final accuracy: {correct / total:.4f}\n")
-        output.write(f"Time spent training: {train_time * 1000:.3f} ms\n")
-        output.write(f"Time spent testing: {test_time * 1000:.3f} ms\n")
+        output(f"Validation complete! Final accuracy: {correct / total:.4f}\n")
+        output(f"Time spent training: {train_time * 1000:.3f} ms\n")
+        output(f"Time spent testing: {test_time * 1000:.3f} ms\n")
 
         return correct / total
     
-    def select_featuers(instance: Instance, feature_indices: list[int]) -> Instance:
+    def select_features(instance: Instance, feature_indices: list[int]) -> Instance:
         selected = [instance.get_feature(i) for i in feature_indices]
         return instance.with_new_features(selected)
