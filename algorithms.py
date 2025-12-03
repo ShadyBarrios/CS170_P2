@@ -6,8 +6,10 @@ from validator import Validator
 
 class Algorithms:
     # returns random accuracy (mimicks no features and random selection)
-    def no_feat_random() -> float:
-        return random.random()
+    def no_feat(dataset: List[Instance]) -> float:
+        value = Validator.validate([], dataset.copy(), None)
+        
+        return value
 
     # returns Node of the feature set with highest accuracy
     def forward_selection(dataset: List[Instance], output=None) -> Node:
@@ -163,6 +165,7 @@ class Algorithms:
                 else:
                     output_forward += f"\n(Warning, accuracy has decreased in forward selection search!)\n"
                     continue_forward = False
+                print(output_forward)
             #################################
             # Backwards part
             if continue_backward:
@@ -194,9 +197,7 @@ class Algorithms:
                 else:
                     output_backward += f"\n(Warning, accuracy has decreased in backward elimination search!)\n"
                     continue_backward = False
-
-            # print(output_forward)
-            # print(output_backward)
+                print(output_backward)
 
             # if both directions have found their best
             if not (continue_forward or continue_backward):

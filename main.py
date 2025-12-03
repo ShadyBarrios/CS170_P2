@@ -25,12 +25,13 @@ def part_three():
         print("Improper input type, defaulting to Forward Selection...")
         algo_choice = 1
 
-    algos:tuple[function] = (Algos.no_feat_random, Algos.forward_selection, Algos.backward_elimination, Algos.hybrid_search)
+    algos:tuple[function] = (Algos.no_feat, Algos.forward_selection, Algos.backward_elimination, Algos.hybrid_search)
 
-    # control_accuracy:float = algos[0]()
-    # print(f"\nUsing no features and \"random\" evaluation, I get an accuracy of {(control_accuracy * 100):.1f}%\n")
+    no_feat = algos[0](dataset)
+    
+    print(f"\nRunning nearest neighbor with no features (default rate), using \"leaving-one-out\" evaluation, I get an accuracy of {(no_feat*100):.2f}%")
 
-    print("Beginning search.\n")
+    print("\nBeginning search.\n")
     with open("part_three_trace.txt", "w") as output:
         choice_result:Node = algos[algo_choice](dataset, output.write)
 
@@ -83,7 +84,7 @@ def part_one():
 
     features = create_feature_list(num_features)
     print("Beginning search.\n")
-    choice_result:Node = algos[algo_choice](features)
+    choice_result:Node = algos[algo_choice](features, print)
 
     print(f"Finished search!! The best feature subset is {choice_result.features_str()}, which has an accuracy of {choice_result.score_str()}")
         

@@ -1,5 +1,5 @@
 import random
-import regex
+import re as regex
 import statistics as stats
 from typing import List
 from instance import Instance
