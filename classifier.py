@@ -1,22 +1,26 @@
 from utils import *
 
 class Classifier:
+    # all instances is not normalized
     def __init__(self, all_instances:list[Instance]):
-        self.all_instances = all_instances # not normalized
-        self.training_instances = None
-        self.dimensions_stats = None
-        
-    def train(self, instances:list[Instance]|list[int]):
+        if len(all_instances) == 0:
+            print("ERROR: Set provided is empty")
+            exit()
+
+        normalization_results = normalize(all_instances)
+        self.all_instances = normalization_results.get_instances()
+        self.dimensions_stats = normalization_results.get_dimensions_stats()
+
+    def train(self, instances:list[int]):
         if len(instances) == 0:
             print("ERROR: Training set provided is empty")
             exit()
 
         if isinstance(instances[0], int):
-            instances = self.get_instances_from_IDs(instances)
-        
-        normalization_results = normalize(instances)
-        self.training_instances = normalization_results.get_instances()
-        self.dimensions_stats = normalization_results.get_dimensions_stats()
+            self.training_instances = self.get_instances_from_IDs(instances)
+        else:
+            print("ERROR: Invalid training supply, must be list of ID's")
+            exit()
 
     def test(self, instance:Instance|int) -> int:
         if isinstance(instance, int):
@@ -33,11 +37,13 @@ class Classifier:
             exit()
         
         normalized_test_input = normalize_instance(instance, self.get_dimensions_stats())
+        # test_input = instance
 
         nearest_neighbor = None
         distance_bsf = float('inf')
         for neighbor in self.get_training_instances():
             distance = normalized_test_input.euclid_dist_to(neighbor)
+            # distance = test_input.euclid_dist_to(neighbor)
 
             if distance < distance_bsf:
                 nearest_neighbor = neighbor
@@ -60,11 +66,13 @@ class Classifier:
         return instances
 
     def get_instance_with_id(self, id:int) -> Instance|None:
-        for instance in self.get_all_instances():
-            if instance.get_id() == id:
-                return instance
+        instance = self.all_instances[id]
+
+        if instance is None:
+            print(f"Instance {id} does not exist in classifier dataset")
+            exit()
         
-        return None
+        return instance
         
     def get_all_instances(self) -> list[Instance]:
         return self.all_instances

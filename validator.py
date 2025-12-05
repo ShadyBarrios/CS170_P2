@@ -45,7 +45,7 @@ class Validator:
             test = reduced[i]
             training_start = time.perf_counter()
             clf = Classifier(training)
-            clf.train(training)
+            clf.train([instance.get_id() for instance in training])
             training_end = time.perf_counter()
             train_time += training_end - training_start
             output(f"Classifier training took {(training_end - training_start) * 1000:.3f} ms\n")

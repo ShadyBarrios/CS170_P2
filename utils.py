@@ -90,11 +90,11 @@ class DimensionStats:
         return self.std
     
 class NormalizationResults:
-    def __init__(self, instances:list[Instance], dimensions_stats:list[DimensionStats]):
+    def __init__(self, instances:dict[int, Instance], dimensions_stats:list[DimensionStats]):
         self.instances = instances
         self.dimensions_stats = dimensions_stats
 
-    def get_instances(self) -> list[Instance]:
+    def get_instances(self) -> dict[int, Instance]:
         return self.instances
     
     def get_dimensions_stats(self) -> list[DimensionStats]:
@@ -111,9 +111,10 @@ def normalize(instances:list[Instance]) -> NormalizationResults:
         stdev = stats.stdev(dimension)
         dimensions_stats.append(DimensionStats(mean, stdev)) # to normalize test inputs
 
-    normalized_instances = []
+    normalized_instances = {}
     for instance in instances:
-        normalized_instances.append(normalize_instance(instance, dimensions_stats))
+        normalized_instance = normalize_instance(instance, dimensions_stats)
+        normalized_instances[normalized_instance.get_id()] = normalized_instance
 
     results = NormalizationResults(normalized_instances, dimensions_stats)
     return results
