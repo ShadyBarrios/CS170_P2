@@ -20,7 +20,8 @@ class Algorithms:
             print("ERROR: Provided empty dataset.")
             exit()
 
-        current_node = Node(None, [], None)        
+        current_node = Node(None, [], None)   
+        node_bsf = None     
         features_bsf = []
         accuracy_bsf = 0
         num_features = len(dataset[0].get_features())
@@ -66,6 +67,8 @@ class Algorithms:
     def backward_elimination(cls:Classifier, output=None) -> Node:
         dataset = list(cls.get_all_instances().values())
 
+        forgiveness = 3
+
         if len(dataset) == 0:
             print("ERROR: Provided empty dataset.")
             exit()
@@ -73,6 +76,7 @@ class Algorithms:
         num_features = len(dataset[0].get_features())
         features = create_feature_list(num_features)
         current_node = Node(None, features.copy(), Validator.validate(cls, features.copy(), dataset, output))
+        node_bsf = current_node
         features_bsf = features.copy()
         accuracy_bsf = current_node.get_score()
 
@@ -98,18 +102,31 @@ class Algorithms:
                 print(f"\nFeature set {best_child.features_str()} was best, accuracy is {best_child.score_str()}\n")
         
                 current_node = best_child
+                node_bsf = best_child
                 accuracy_bsf = best_child.get_score()
                 features_bsf = best_child.get_features()
 
             else:
-                print(f"\n(Warning, Accuracy has decreased!)")
+                if forgiveness > 0:
+                    current_node = best_child
+                    print(f"\n(Warning, Accuracy has decreased!) continuing search for {forgiveness} more fails\n")
+                    print(f"\nFeature set {best_child.features_str()} was best, accuracy is {best_child.score_str()}\n")
+                    features_bsf = best_child.get_features()
+                    forgiveness -= 1
+                    
+                    # Stop when one feature remains
+                    if len(features_bsf) <= 1:
+                        break
+
+                    continue
+                print(f"\n(Warning, Accuracy has decreased!) Ending search")
                 break
 
             # Stop when one feature remains
             if len(features_bsf) <= 1:
                 break
 
-        return current_node
+        return node_bsf
     
     # EC: "Original" algo will be a mix of forward selection and backward elimination search
     def hybrid_search(cls:Classifier, output=None) -> Node:
@@ -136,6 +153,8 @@ class Algorithms:
 
         accuracy_bsf_forward = float('-inf')
         accuracy_bsf_backward = current_node_backward.get_score()
+
+        forgiveness_backward = 3
 
         while True:
             # Forward part
@@ -202,7 +221,23 @@ class Algorithms:
                     accuracy_bsf_backward = best_child_backward.get_score()
                     features_bsf_backward = best_child_backward.get_features()
                 else:
-                    output_backward += f"\n(Warning, accuracy has decreased in backward elimination search!)\n"
+                    if forgiveness_backward > 0:
+                        current_node_backward = best_child_backward
+                        print(f"\n(Warning, Accuracy has decreased!) continuing search for {forgiveness_backward} more fails\n")
+                        print(f"\nFeature set {best_child_backward.features_str()} was best, accuracy is {best_child_backward.score_str()}\n")
+                        features_bsf_backward = best_child_backward.get_features()
+                        forgiveness_backward -= 1
+                        
+                        # Stop when one feature remains
+                        if len(features_bsf_backward) <= 1:
+                            continue_backward = False
+
+                        continue
+                    print(f"\n(Warning, Accuracy has decreased!) Ending search")
+                    continue_backward = False
+                
+                # Stop when one feature remains
+                if len(features_bsf_backward) <= 1:
                     continue_backward = False
                 print(output_backward)
 
