@@ -2,6 +2,7 @@ from algorithms import Algorithms as Algos
 from node import Node
 from utils import *
 from validator import Validator
+from classifier import Classifier
 
 def main():
     part_three()
@@ -11,6 +12,7 @@ def part_three():
 
     dataset_file = input("Enter the dataset file (.txt): ")
     dataset = parse_file(dataset_file)
+    cls = Classifier(dataset)
     
     print("Type the number of the algorithm you want to run.")
     print("\t1) Forward Selection")
@@ -27,13 +29,13 @@ def part_three():
 
     algos:tuple[function] = (Algos.no_feat, Algos.forward_selection, Algos.backward_elimination, Algos.hybrid_search)
 
-    no_feat = algos[0](dataset)
+    no_feat = algos[0](cls)
     
     print(f"\nRunning nearest neighbor with no features (default rate), using \"leaving-one-out\" evaluation, I get an accuracy of {(no_feat*100):.2f}%")
 
     print("\nBeginning search.\n")
     with open("part_three_trace.txt", "w") as output:
-        choice_result:Node = algos[algo_choice](dataset, output.write)
+        choice_result:Node = algos[algo_choice](cls, output.write)
 
     print(f"Finished search!! The best feature subset is {choice_result.features_str()}, which has an accuracy of {choice_result.score_str()}")
 
@@ -41,16 +43,18 @@ def part_two():
     with open("part_two_trace.txt", "w") as output:
         output.write(f"Welcome to cjord019/sgonz26 Actual Evaluation and NN-Classifier.\n")
 
-        small = parse_file("small-test-dataset-2-2.txt")
+        small = parse_file("datasets/small-test-dataset.txt")
+        small_cls = Classifier(small)
         small_subset = [3, 5, 7]
         output.write("\nTesting small dataset with features {3,5,7}\n")
-        small_acc = Validator.validate(small_subset, small, output = output.write)
+        small_acc = Validator.validate(small_cls, small_subset, output = output.write)
         output.write(f"Small dataset accuracy: {small_acc:.4f} (expected: 0.89)\n")
 
-        large = parse_file("large-test-dataset-2.txt")
+        large = parse_file("datasets/large-test-dataset.txt")
+        large_cls = Classifier(large)
         large_subset = [1, 15, 27]
         output.write("\nTesting large dataset with features {1,15,27}\n")
-        large_acc = Validator.validate(large_subset, large, output = output.write)
+        large_acc = Validator.validate(large_cls, large_subset, output = output.write)
         output.write(f"Large dataset accuracy: {large_acc:.4f} (expected: 0.949)\n")
 
 def part_one():

@@ -3,7 +3,10 @@ from instance import Instance
 from classifier import Classifier
 
 class Validator:
-    def validate(feature_subset:list[float], training_data:list[Instance], output=print) -> float:
+    def validate(clf:Classifier, feature_subset:list[int], training_data=None, output=print) -> float:
+        if training_data is None:
+            training_data = list(clf.get_all_instances().values())
+        
         if len(training_data) == 0:
             return 0.0
         
@@ -43,8 +46,8 @@ class Validator:
             # Train classifer
             test = reduced[i]
             training_start = time.perf_counter()
-            clf = Classifier(training)
-            clf.train(training)
+            # clf = Classifier(training)
+            clf.train(training, feature_indices)
             training_end = time.perf_counter()
             train_time += training_end - training_start
             if output is not None:
@@ -73,5 +76,4 @@ class Validator:
         return correct / total
     
     def select_features(instance: Instance, feature_indices: list[int]) -> Instance:
-        selected = [instance.get_feature(i) for i in feature_indices]
-        return instance.with_new_features(selected)
+        return instance.with_features(feature_indices)

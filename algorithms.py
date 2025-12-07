@@ -3,16 +3,19 @@ from utils import *
 from typing import List
 from instance import Instance
 from validator import Validator
+from classifier import Classifier
 
 class Algorithms:
     # returns random accuracy (mimicks no features and random selection)
-    def no_feat(dataset: List[Instance]) -> float:
-        value = Validator.validate([], dataset.copy(), None)
+    def no_feat(cls:Classifier) -> float:
+        value = Validator.validate(cls, [], None, None)
         
         return value
 
     # returns Node of the feature set with highest accuracy
-    def forward_selection(dataset: List[Instance], output=None) -> Node:
+    def forward_selection(cls:Classifier, output=None) -> Node:
+        dataset = list(cls.get_all_instances().values())
+
         if len(dataset) == 0:
             print("ERROR: Provided empty dataset.")
             exit()
@@ -33,7 +36,7 @@ class Algorithms:
                 new_feature_set = [feature]
                 new_feature_set.extend(features_bsf)
 
-                score = Validator.validate(new_feature_set.copy(), dataset.copy(), output)
+                score = Validator.validate(cls, new_feature_set.copy(), dataset.copy(), output)
                 
                 child = Node(current_node, new_feature_set, score)
                 print(f"\t{child}")
@@ -60,14 +63,16 @@ class Algorithms:
         return current_node
 
     # returns Node of the feature set with the highest accuracy
-    def backward_elimination(dataset: List[Instance], output=None) -> Node:
+    def backward_elimination(cls:Classifier, output=None) -> Node:
+        dataset = list(cls.get_all_instances().values())
+
         if len(dataset) == 0:
             print("ERROR: Provided empty dataset.")
             exit()
         
         num_features = len(dataset[0].get_features())
         features = create_feature_list(num_features)
-        current_node = Node(None, features.copy(), Validator.validate(features.copy(), dataset, output))
+        current_node = Node(None, features.copy(), Validator.validate(cls, features.copy(), dataset, output))
         features_bsf = features.copy()
         accuracy_bsf = current_node.get_score()
 
@@ -79,7 +84,7 @@ class Algorithms:
                 new_feature_set = features_bsf.copy()
                 new_feature_set.remove(feature)
 
-                score = Validator.validate(new_feature_set.copy(), dataset.copy(), output)
+                score = Validator.validate(cls, new_feature_set.copy(), dataset.copy(), output)
                 child = Node(current_node, new_feature_set, score)
 
                 print(f"\t{child}")
@@ -107,7 +112,9 @@ class Algorithms:
         return current_node
     
     # EC: "Original" algo will be a mix of forward selection and backward elimination search
-    def hybrid_search(dataset: List[Instance], output=None) -> Node:
+    def hybrid_search(cls:Classifier, output=None) -> Node:
+        dataset = list(cls.get_all_instances().values())
+
         if len(dataset) == 0:
             print("ERROR: Provided empty dataset.")
             exit()
@@ -116,7 +123,7 @@ class Algorithms:
         features = create_feature_list(num_features)
 
         empty_node = Node(None, [], float('-inf'))
-        full_node = Node(None, features.copy(), Validator.validate(features.copy(), dataset.copy(), output))
+        full_node = Node(None, features.copy(), Validator.validate(cls, features.copy(), dataset.copy(), output))
 
         continue_forward = True
         continue_backward = True
@@ -144,7 +151,7 @@ class Algorithms:
                     new_feature_set = [feature]
                     new_feature_set.extend(features_bsf_forward)
 
-                    score = Validator.validate(new_feature_set.copy(), dataset.copy(), output)
+                    score = Validator.validate(cls, new_feature_set.copy(), dataset.copy(), output)
 
                     child = Node(current_node_forward, new_feature_set, score)
                     output_forward += f"\t{child}\n"
@@ -177,7 +184,7 @@ class Algorithms:
                     new_feature_set = features_bsf_backward.copy()
                     new_feature_set.remove(feature)
 
-                    score = Validator.validate(new_feature_set.copy(), dataset.copy(), output)
+                    score = Validator.validate(cls, new_feature_set.copy(), dataset.copy(), output)
                     child = Node(current_node_backward, new_feature_set, score)
 
                     output_backward += f"\t{child}\n"
