@@ -1,12 +1,20 @@
 from utils import *
+from enum import Enum
+
+class Normalize(Enum):
+    Z_SCORE = 1
+    NONE = 2
 
 class Classifier:
-    def __init__(self, all_instances:list[Instance]):
+    def __init__(self, all_instances:list[Instance], normalization:Normalize):
         self.all_instances = {}
         self.training_instances = {}
 
 
-        self.all_instances = normalize(all_instances)
+        if normalization == Normalize.Z_SCORE:
+            self.all_instances = normalize(all_instances)
+        else:
+            self.all_instances = to_dict(all_instances)
         
     def train(self, instances:list[Instance]|list[int], features:list[int]):
         if len(instances) == 0:
