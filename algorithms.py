@@ -223,8 +223,8 @@ class Algorithms:
                 else:
                     if forgiveness_backward > 0:
                         current_node_backward = best_child_backward
-                        print(f"\n(Warning, Accuracy has decreased!) continuing search for {forgiveness_backward} more fails\n")
-                        print(f"\nFeature set {best_child_backward.features_str()} was best, accuracy is {best_child_backward.score_str()}\n")
+                        output_backward += f"\n(Warning, Accuracy has decreased!) continuing search for {forgiveness_backward} more fails\n"
+                        output_backward += f"\nFeature set {best_child_backward.features_str()} was best, accuracy is {best_child_backward.score_str()}\n"
                         features_bsf_backward = best_child_backward.get_features()
                         forgiveness_backward -= 1
                         
@@ -233,7 +233,7 @@ class Algorithms:
                             continue_backward = False
 
                         continue
-                    print(f"\n(Warning, Accuracy has decreased!) Ending search")
+                    output_backward += f"\n(Warning, Accuracy has decreased!) Ending search"
                     continue_backward = False
                 
                 # Stop when one feature remains
