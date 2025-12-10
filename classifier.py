@@ -2,21 +2,27 @@ from utils import *
 
 class Classifier:
     def __init__(self, all_instances:list[Instance]):
-        self.all_instances = all_instances # not normalized
-        self.training_instances = None
-        self.dimensions_stats = None
+        self.all_instances = {}
+        self.training_instances = {}
+
+
+        self.all_instances = normalize(all_instances)
         
-    def train(self, instances:list[Instance]|list[int]):
+    def train(self, instances:list[Instance]|list[int], features:list[int]):
         if len(instances) == 0:
             print("ERROR: Training set provided is empty")
             exit()
 
-        if isinstance(instances[0], int):
-            instances = self.get_instances_from_IDs(instances)
+        ids = instances
+        if isinstance(instances[0], Instance):
+            ids = [instance.get_id() for instance in instances]
         
-        normalization_results = normalize(instances)
-        self.training_instances = normalization_results.get_instances()
-        self.dimensions_stats = normalization_results.get_dimensions_stats()
+        self.training_instances = {}
+        for id in ids:
+            instance = self.get_instance_with_id(id)
+            if instance is None:
+                print("Train error: provided ID does not exist in dataset")
+            self.training_instances[id] = instance.with_features(features)
 
     def test(self, instance:Instance|int) -> int:
         if isinstance(instance, int):
@@ -28,16 +34,15 @@ class Classifier:
             
             # print(f"Testing instance ID {instance.get_id()} with expected result {instance.get_class()}")
             
-        if self.get_training_instances() is None or self.get_dimensions_stats() is None:
+        if self.get_training_instances() is None:
             print(f"ERROR: Classifier has not been trained yet.")
             exit()
-        
-        normalized_test_input = normalize_instance(instance, self.get_dimensions_stats())
 
         nearest_neighbor = None
         distance_bsf = float('inf')
-        for neighbor in self.get_training_instances():
-            distance = normalized_test_input.euclid_dist_to(neighbor)
+
+        for neighbor in list(self.get_training_instances().values()):
+            distance = instance.euclid_dist_to(neighbor)
 
             if distance < distance_bsf:
                 nearest_neighbor = neighbor
@@ -60,17 +65,13 @@ class Classifier:
         return instances
 
     def get_instance_with_id(self, id:int) -> Instance|None:
-        for instance in self.get_all_instances():
-            if instance.get_id() == id:
-                return instance
+        instance = self.all_instances[id]
+        if instance is None:
+            return None
+        return instance
         
-        return None
-        
-    def get_all_instances(self) -> list[Instance]:
+    def get_all_instances(self) -> dict[int, Instance]:
         return self.all_instances
 
-    def get_training_instances(self) -> list[Instance]:
+    def get_training_instances(self) -> dict[int, Instance]:
         return self.training_instances
-
-    def get_dimensions_stats(self) -> list[DimensionStats]:
-        return self.dimensions_stats

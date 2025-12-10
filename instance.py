@@ -6,6 +6,16 @@ class Instance:
         self.cls = cls
         self.features = features
     
+    # returns a copy based on the list of features provided
+    def with_features(self, feature_indices:list[int]):
+        features = []
+        for feature in feature_indices:
+            if feature >= len(self.features):
+                print("with_features ERROR: feature requested does not exist")
+                exit()
+            features.append(self.get_feature(feature))
+        return Instance(self.id, self.cls, features)
+    
     # returns a copy with expected normalized features
     def with_new_features(self, normalized_features:list[float]):
         return Instance(self.id, self.cls, normalized_features)

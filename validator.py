@@ -1,12 +1,11 @@
 import time
-from algorithms import Algorithms, AlgoTypes
 from instance import Instance
 from classifier import Classifier
 
 class Validator:
-    def validate(feature_subset:list[float], nn_type:AlgoTypes, training_data:list[Instance], output=None) -> float:
-        if output is None:
-            output = print
+    def validate(clf:Classifier, feature_subset:list[int], training_data=None, output=print) -> float:
+        if training_data is None:
+            training_data = list(clf.get_all_instances().values())
         
         if len(training_data) == 0:
             return 0.0
@@ -19,7 +18,8 @@ class Validator:
         train_time = 0
         test_time = 0
 
-        output(f"Validating dataset with {total} instances\n\n")
+        if output is not None:
+            output(f"Validating dataset with {total} instances\n\n")
 
         reduced = []
 
@@ -29,10 +29,12 @@ class Validator:
             reduced.append(Validator.select_features(feature, feature_indices))
 
         reduce_end = time.perf_counter()
-        output(f"Selecting features took {(reduce_end - reduce_start) * 1000:.3f} ms\n \n")
+        if output is not None:
+            output(f"Selecting features took {(reduce_end - reduce_start) * 1000:.3f} ms\n \n")
 
         for i in range(total):
-            output(f"Excluding instance {training_data[i].get_id()}\n")
+            if output is not None:
+                output(f"Excluding instance {training_data[i].get_id()}\n")
 
             training = []
             for j in range(total):
@@ -44,11 +46,12 @@ class Validator:
             # Train classifer
             test = reduced[i]
             training_start = time.perf_counter()
-            clf = Classifier(training)
-            clf.train(training)
+            # clf = Classifier(training)
+            clf.train(training, feature_indices)
             training_end = time.perf_counter()
             train_time += training_end - training_start
-            output(f"Classifier training took {(training_end - training_start) * 1000:.3f} ms\n")
+            if output is not None:
+                output(f"Classifier training took {(training_end - training_start) * 1000:.3f} ms\n")
 
             # Test on remaining 
             test_start = time.perf_counter()
@@ -56,19 +59,21 @@ class Validator:
             test_end = time.perf_counter()
             actual = training_data[i].get_class()
             test_time += test_end - test_start
-            output(f"Comparing predicted ({predicted}) and actual ({actual}) took {(test_end - test_start) * 1000:.3f} ms\n")
+            if output is not None:
+                output(f"Comparing predicted ({predicted}) and actual ({actual}) took {(test_end - test_start) * 1000:.3f} ms\n")
 
             if predicted == actual:
                 correct += 1
 
-            output(f"Correct so far: {correct} / {i+1}\n \n")
+            if output is not None:
+                output(f"Correct so far: {correct} / {i+1}\n \n")
 
-        output(f"Validation complete! Final accuracy: {correct / total:.4f}\n")
-        output(f"Time spent training: {train_time * 1000:.3f} ms\n")
-        output(f"Time spent testing: {test_time * 1000:.3f} ms\n")
+        if output is not None:
+            output(f"Validation complete! Final accuracy: {correct / total:.4f}\n")
+            output(f"Time spent training: {train_time * 1000:.3f} ms\n")
+            output(f"Time spent testing: {test_time * 1000:.3f} ms\n")
 
         return correct / total
     
     def select_features(instance: Instance, feature_indices: list[int]) -> Instance:
-        selected = [instance.get_feature(i) for i in feature_indices]
-        return instance.with_new_features(selected)
+        return instance.with_features(feature_indices)

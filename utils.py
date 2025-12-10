@@ -1,5 +1,5 @@
 import random
-import regex
+import re as regex
 import statistics as stats
 from typing import List
 from instance import Instance
@@ -25,8 +25,10 @@ def parse_file(filename:str) -> list[Instance]:
     instance_id = 0
     size_precedence = 0
 
-    class_format = "[1-2]\.0{7}e\+0{3}"
-    feature_format = "[1-9]\.[0-9]{7}e[+-][0-9]{3}"
+    # titanic class is either 1 or 0
+    class_format = "[0-2]\.0{7}e\+0{3}"
+    # titanic features can go from 0 to 9
+    feature_format = "[0-9]\.[0-9]{7}e[+-][0-9]{3}"
 
     if filename[-4::] != ".txt":
         print("ERROR: File must be .txt type")
@@ -88,20 +90,9 @@ class DimensionStats:
     
     def get_std(self) -> float:
         return self.std
-    
-class NormalizationResults:
-    def __init__(self, instances:list[Instance], dimensions_stats:list[DimensionStats]):
-        self.instances = instances
-        self.dimensions_stats = dimensions_stats
-
-    def get_instances(self) -> list[Instance]:
-        return self.instances
-    
-    def get_dimensions_stats(self) -> list[DimensionStats]:
-        return self.dimensions_stats
 
 # use z-score normalizing
-def normalize(instances:list[Instance]) -> NormalizationResults:
+def normalize(instances:list[Instance]) -> dict[int, Instance]:
     if len(instances) < 2: return instances
 
     dimensions = get_dimensions(instances)
@@ -111,12 +102,12 @@ def normalize(instances:list[Instance]) -> NormalizationResults:
         stdev = stats.stdev(dimension)
         dimensions_stats.append(DimensionStats(mean, stdev)) # to normalize test inputs
 
-    normalized_instances = []
+    normalized_instances = {}
     for instance in instances:
-        normalized_instances.append(normalize_instance(instance, dimensions_stats))
+        instance = normalize_instance(instance, dimensions_stats)
+        normalized_instances[instance.get_id()] = instance
 
-    results = NormalizationResults(normalized_instances, dimensions_stats)
-    return results
+    return normalized_instances
 
 def normalize_instance(instance:Instance, dimensions_stats:list[DimensionStats]) -> Instance:
     if len(instance.get_features()) != len(dimensions_stats):
