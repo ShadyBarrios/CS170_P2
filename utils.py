@@ -140,3 +140,10 @@ def get_dimensions(instances:list[Instance]) -> list[list[float]]:
         dimensions.append(dimension)
     
     return dimensions
+
+def to_dict(instances:list[Instance]) -> dict[int, Instance]:
+    dictionary = {}
+    for instance in instances:
+        dictionary[instance.get_id()] = instance
+    
+    return dictionary

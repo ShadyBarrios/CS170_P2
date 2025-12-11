@@ -2,7 +2,7 @@ from algorithms import Algorithms as Algos
 from node import Node
 from utils import *
 from validator import Validator
-from classifier import Classifier
+from classifier import Classifier, Normalize
 
 # Group Name: A* Royale | Cade Jordan - cjord019 | Scott Gonzalez Barrios - sgonz266
 # Dataset results:
@@ -27,7 +27,7 @@ def part_three():
 
     dataset_file = input("Enter the dataset file (.txt): ")
     dataset = parse_file(dataset_file)
-    cls = Classifier(dataset)
+    cls = Classifier(dataset, Normalize.Z_SCORE) # Change to Normalize.NONE for no normalization, .Z_SCORE for z-score normalization
     
     print("Type the number of the algorithm you want to run.")
     print("\t1) Forward Selection")
